@@ -17,6 +17,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -68,7 +69,14 @@ public class MainActivity extends Activity {
             Uri incoming = getIntent() != null ? getIntent().getData() : null;
             webView.loadUrl(incoming != null && isInternal(incoming) ? incoming.toString() : START_URL);
             checkForUpdate();
+            showVersion();
         }
+    }
+
+    /** Shows the installed version for a couple of seconds on launch. */
+    private void showVersion() {
+        Toast.makeText(this, "Parley " + BuildConfig.VERSION_NAME + " (build " + BuildConfig.VERSION_CODE + ")",
+                Toast.LENGTH_SHORT).show();
     }
 
     private void configureWebView() {
@@ -218,7 +226,8 @@ public class MainActivity extends Activity {
         if (isFinishing() || isDestroyed()) return;
         new AlertDialog.Builder(this)
                 .setTitle("Update available")
-                .setMessage("A newer version of Parley is out. Update it through SideQuest, or download it from the release page.")
+                .setMessage("A newer version of Parley is out. You have " + BuildConfig.VERSION_NAME
+                        + " (build " + BuildConfig.VERSION_CODE + "). Update it through SideQuest, or download it from the release page.")
                 .setPositiveButton("View release", (d, w) -> openExternally(Uri.parse(RELEASES_PAGE_URL)))
                 .setNegativeButton("Later", null)
                 .show();

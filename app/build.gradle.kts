@@ -4,6 +4,8 @@ plugins {
 
 // CI passes the GitHub run number, so every build gets a higher version automatically.
 val ciVersionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
+// Release builds take the name from the git tag (v1.2 -> 1.2); other builds are "dev".
+val ciVersionName = System.getenv("VERSION_NAME")?.removePrefix("v")?.takeIf { it.isNotBlank() } ?: "dev"
 val keystoreFile: String? = System.getenv("KEYSTORE_FILE")
 
 android {
@@ -15,7 +17,7 @@ android {
         minSdk = 29
         targetSdk = 34
         versionCode = ciVersionCode
-        versionName = "1.0.$ciVersionCode"
+        versionName = ciVersionName
     }
 
     buildFeatures {
