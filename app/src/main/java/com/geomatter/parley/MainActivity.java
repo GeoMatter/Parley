@@ -95,10 +95,17 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                if (!request.isForMainFrame()) {
+                    return false; // embedded frames load normally
+                }
                 Uri uri = request.getUrl();
                 String scheme = uri.getScheme();
                 if (("https".equals(scheme) || "http".equals(scheme)) && isInternal(uri)) {
                     return false; // load in-app
+                }
+                if (isGoogleSignIn(uri)) {
+                    showGoogleSignInTip(); // Google blocks sign-in inside apps
+                    return true;
                 }
                 openExternally(uri);
                 return true;
@@ -225,6 +232,20 @@ public class MainActivity extends Activity {
         }
         return "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/"
                 + chromeVersion + " Safari/537.36";
+    }
+
+    private static boolean isGoogleSignIn(Uri uri) {
+        String host = uri.getHost();
+        return host != null && host.equalsIgnoreCase("accounts.google.com");
+    }
+
+    private void showGoogleSignInTip() {
+        if (isFinishing() || isDestroyed()) return;
+        new AlertDialog.Builder(this)
+                .setTitle("Use email to sign in")
+                .setMessage("Google sign-in doesn't work inside apps. Tap 'Continue with email' and use your Gmail address. It's the same account.")
+                .setPositiveButton("Got it", null)
+                .show();
     }
 
     private static boolean isInternal(Uri uri) {
